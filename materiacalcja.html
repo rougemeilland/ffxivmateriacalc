@@ -28,6 +28,15 @@
         </p>
     </div>
     <div id="mainview" style="display:none;">
+        <div class="languagesettingstyle">
+            <label for="language">言語を選択してください: </label>
+            <select onChange="location.href=value;">
+                <option value="#" selected>日本語</option>
+                <option value="materiacalcen.html">English</option>
+                <option value="materiacalcfr.html">Français</option>
+                <option value="materiacalcde.html">Deutsch</option>
+            </select>
+        </div>
         <fieldset>
             <legend>装着対象装備の設定</legend>
             <table>
@@ -40,7 +49,8 @@
                             <option value="3">45～54 (マテリア～マテリダが使用可)</option>
                             <option value="4">55～159 (マテリア～マテリガが使用可)</option>
                             <option value="5">160～289 (マテリア～マテリジャが使用可)</option>
-                            <option value="6">290～ (マテリア～ハイマテリジャが使用可)</option>
+                            <option value="6">290～419 (マテリア～ハイマテリジャが使用可)</option>
+                            <option value="8">420～ (マテリア～エクスマテリジャが使用可)</option>
                         </select>
                     </td>
                 </tr>
@@ -236,7 +246,7 @@
         </fieldset>
         <fieldset>
             <legend>対応バージョン</legend>
-            <p><a href="http://jp.finalfantasyxiv.com/">FINAL FANTASY XIV</a> 4.0 STOOMBLOOD(紅蓮の解放者)に対応済です</p>
+            <p><a href="http://jp.finalfantasyxiv.com/">FINAL FANTASY XIV</a> 5.0 SHADOWBRINGERS(漆黒の反逆者)に対応済です</p>
         </fieldset>
         <fieldset>
             <legend>必要なもの</legend>
@@ -247,12 +257,10 @@
             <ol>
                 <li><a href="#mainview">メインページ</a>を表示してください。</li>
                 <li>「装着対象装備の設定」、「マテリア装着の設定」を入力してください。</li>
-                <li>
-                    「上げたいステータスの設定」を入力してください。<br />
+                <li>「上げたいステータスの設定」を入力してください。<br />
                     ステータスの値にはとりあえずその装備の上限値を入れてみて、計算結果が高コストすぎたり実現不可能だった場合には見直しをかければいいでしょう。
                 </li>
-                <li>
-                    「アイテムの相場の設定」でマテリアや触媒の相場を入力してください。品薄で入手が困難などの理由で使用したくないマテリアや触媒がある場合は、そのアイテムのチェックを外してください。<br />
+                <li>「アイテムの相場の設定」でマテリアや触媒の相場を入力してください。品薄で入手が困難などの理由で使用したくないマテリアや触媒がある場合は、そのアイテムのチェックを外してください。<br />
                     「クリアする」ボタンを押すと入力されているアイテムの相場がすべて消去されます。<br />
                     「サンプル設定」ボタンを押すと入力されているアイテムの相場が消去されて代わりにサンプルのアイテム相場データが自動的に入力されます。
                 </li>
@@ -260,7 +268,7 @@
             </ol>
             <p>
                 なお、簡単にお試しで使っていただけるように、マテリアの相場の初期設定としてサンプルデータ(某鯖での某月某日の相場)が設定済みになっています。<br />
-                <b>本番で計算をする場合は、マーケットボードでマテリアの相場を設定し直しよう強くお勧めします。</b> 
+                <b>本番で計算をする場合は、ゲーム内のマーケットボードでマテリアの相場を確認し、設定をし直してください。</b> 
             </p>
         </fieldset>
         <fieldset>
@@ -292,8 +300,8 @@
             <ul>
                 <li>対象装備のアイテムレベル/品質/マテリア穴の数を間違えていませんか?</li>
                 <li>使用するかもしれないマテリアの相場をすべて入力していますか?</li>
-                <li>STR/VIT/DEX/INT/MNDのいずれかを禁断しなければ達成できないようなステータスを目標値に設定していませんか?<br /><b>※STR/VIT/DEX/INT/MNDのいずれかのステータスを上げるマテリアを禁断装着することはできません。</b></li>
-                <li>ハイマテリジャを2回目以降の禁断にしようしなければ達成できないようなステータスを目標値に設定していませんか?<br /><b>※ハイマテリジャは禁断の2回目以降に使用することはできません。</b></li>
+                <!--<li>STR/VIT/DEX/INT/MNDのいずれかを禁断しなければ達成できないようなステータスを目標値に設定していませんか?<br /><b>※STR/VIT/DEX/INT/MNDのいずれかのステータスを上げるマテリアを禁断装着することはできません。</b></li>-->
+                <li>エクスマテリジャまたはハイマテリジャを2回目以降の禁断に使用しなければ達成できないようなステータスを目標値に設定していませんか?<br /><b>※エクスマテリジャとハイマテリジャは禁断の2回目以降に使用することはできません。</b></li>
             </ul>
             <a href="#mainview">設定を変更して再計算する</a>
         </div>
@@ -302,19 +310,19 @@
         <hr />
         <div>
             <a href="#outlineview">はじめに</a>
-            <a href="#generalsettingview" style="margin-left:1em;">一般的な設定</a>
+            <!--<a href="#generalsettingview" style="margin-left:1em;">一般的な設定</a>-->
             <a href="http://jp.finalfantasyxiv.com/lodestone/" style="margin-left:1em;">公式サイト</a>
         </div>
         <hr />
         <div>
             <p class="copyrightblockstyle">
                 記載されている会社名・製品名・システム名などは、各社の商標、または登録商標です。<br />
-                Copyright (C) 2010 - 2017 SQUARE ENIX CO., LTD. All Rights Reserved.
+                Copyright (C) 2010 - 2020 SQUARE ENIX CO., LTD. All Rights Reserved.
                 /
-                Copyright (C) 2017-2019 <a href="https://github.com/rougemeilland">Palmtree Software</a> All Rights Reserved.
+                Copyright (C) 2017-2020 <a href="https://github.com/rougemeilland">Palmtree Software</a> All Rights Reserved.
             </p>
             <p class="versioninfoblockstyle">
-                最終更新日: 2019年4月27日
+                最終更新日: 2020年3月15日
             </p>
         </div>
     </footer>

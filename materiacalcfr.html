@@ -1,0 +1,343 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Materia cost calculator</title>
+    <link rel="stylesheet" type="text/css" href="materiacalc.min.css" />
+    <script type="text/javascript" src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+</head>
+<body>
+    <div id="loadingview">
+        <p>
+            Loading...
+            <span id="loadingprogress">
+                □□□□□□□□□□
+            </span>
+            : <span id="loadingprogresspercent">0</span>%
+            <!-- EdgeとIEではvalue属性を設定すると「ぬるっ」とバーがアニメーションで変化するが、待機タスクのキューが空でないと表示の更新は行われない(ように見える)。
+                I/O待ち合わせのタスクのみならバーはきちんと再描画されるが、何らかのCPU処理を行っていてその進行状況を表示したい場合は途中経過が表示されず処理が終了した途端に一斉に描画されることになる。(確証はないがそのようにふるまっているように見える)
+                この処理の場合、ダウンロードしたデータの伸長にもっとも時間をかけており、まさに上記の問題に該当するため、進行状況の表示の意味がない。
+                よって、progressタグ の使用は断念し、もっと原始的な表示方法を採用することにした。
+            <label>
+                <progress max="100" value="0" id="loadingprogress">
+                    <span style="width:2em;" id="loadingprogresspercent1"></span>%
+                </progress>
+                : <span style="width:2em;" id="loadingprogresspercent2"></span>%
+            </label>
+            -->
+        </p>
+    </div>
+    <div id="mainview" style="display:none;">
+        <div class="languagesettingstyle">
+            <label for="language">Select language: </label>
+            <select onChange="location.href=value;">
+                <option value="materiacalcja.html">日本語</option>
+                <option value="materiacalcen.html">English</option>
+                <option value="#" selected>Français</option>
+                <option value="materiacalcde.html">Deutsch</option>
+            </select>
+        </div>
+        <fieldset>
+            <legend>Equipment setting</legend>
+            <table>
+                <tr>
+                    <td style="text-align:right;">Item level:</td>
+                    <td>
+                        <select id="maximumgradeid" name="maximumgradeid">
+                            <option value="1" selected="selected">15 - 29 (Materia I is available)</option>
+                            <option value="2">30 - 44 (Materia I-II is available)</option>
+                            <option value="3">45 - 54 (Materia I-III is available)</option>
+                            <option value="4">55 - 159 (Materia I-IV is available)</option>
+                            <option value="5">160 - 289 (Materia I-V is available)</option>
+                            <option value="6">290 - 419 (Materia I-VI is available)</option>
+                            <option value="8">420 - (Materia I-VIII is available)</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Quality:</td>
+                    <td>
+                        <label class="radiobuttonlabelstyle">
+                            <input type="radio" name="quality" value="nq" checked="checked" />
+                            Normal quality
+                        </label>
+                        <label class="radiobuttonlabelstyle">
+                            <input type="radio" name="quality" value="hq" />
+                            High quality
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">All materia slots:</td>
+                    <td>
+                        <select name="materiaslotcount" id="materiaslotcount">
+                            <option value="1" selected="selected">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Used slots:</td>
+                    <td>
+                        <select name="usedmateriacount" id="usedmateriacount">
+                            <option value="0" selected="selected">None</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset>
+            <legend>Melding materia setting</legend>
+            <div>
+                <label class="radiobuttonlabelstyle">
+                    <input type="radio" name="kindanallowed" value="enabled" checked="checked" />
+                    Consider overmelding
+                </label>
+                <label class="radiobuttonlabelstyle">
+                    <input type="radio" name="kindanallowed" value="disabled" />
+                    Don't consider overmelding
+                </label>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Stat increasing setting</legend>
+            <table>
+                <tr>
+                    <td style="text-align:right;">1.</td>
+                    <td>
+                        <select name="statustype1" id="statustype1" data-statusvalueid="statusvalue1"></select>
+                        <select name="statusvalue1" id="statusvalue1" style="display:none;"></select>
+                    </td>
+                    <td>
+                        <span id="statusselectionerrormessage" class="errormessageiconstyle" data-text="Select stat">！</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">2.</td>
+                    <td>
+                        <select name="statustype2" id="statustype2" data-statusvalueid="statusvalue2"></select>
+                        <select name="statusvalue2" id="statusvalue2" style="display:none;"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">3.</td>
+                    <td>
+                        <select name="statustype3" id="statustype3" data-statusvalueid="statusvalue3"></select>
+                        <select name="statusvalue3" id="statusvalue3" style="display:none;"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">4.</td>
+                    <td>
+                        <select name="statustype4" id="statustype4" data-statusvalueid="statusvalue4"></select>
+                        <select name="statusvalue4" id="statusvalue4" style="display:none;"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">5.</td>
+                    <td>
+                        <select name="statustype5" id="statustype5" data-statusvalueid="statusvalue5"></select>
+                        <select name="statusvalue5" id="statusvalue5" style="display:none;"></select>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset id="itempricelistview" style="display:none;">
+            <legend>Market price setting</legend>
+            <table id="itempricelist">
+                <tbody>
+                    <tr data-itemid="125" data-itemtype="c" data-itempriceavailable="false" style="display:none;">
+                        <td class="priceheaderstyle">
+                            コールマターG5
+                        </td>
+                        <td>
+                            <input type="checkbox" id="itemused125" data-itemid="125" data-itempriceid="itemprice125" data-itemnotusedtextid="itemnotusedtext125" data-itempriceerrormessageid="itempriceerrormessage125" />
+                            <span id="itemnotusedtext125" style="display:none;">使用しない</span>
+                            <input type="text" id="itemprice125" class="priceboxstyle" data-itemid="125" data-itemusedid="itemused125" data-itempriceerrormessageid="itempriceerrormessage125" />Gil
+                        </td>
+                        <td>
+                            <span id="itempriceerrormessage125" data-text="" class="errormessageiconstyle" style="display:none;">！</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="itempricesettingbuttonsstyle">
+                <button id="itempriceclearbutton">Clear market price setting</button>
+                <button id="itempriceexsamplebutton">Set example values to market price</button>
+            </div>
+        </fieldset>
+        <div style="margin-top:1em;">
+            <button id="calculatebutton" disabled="disabled">Start Calculation</button>
+        </div>
+    </div>
+    <div id="resultview" style="display:none;">
+        <fieldset>
+            <legend>Result</legend>
+            <div>
+                <span>Desired Stat:</span>
+                <span id="resultdesiredstatustable"></span>
+            </div>
+            <div>
+                <span>Total cost(expectation):</span>
+                約 <span id="resulttotalcostvalue"></span> gil
+            </div>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Melded materia</th>
+                        <th>Stat increased</th>
+                        <th>Success rate</th>
+                    </tr>
+                </thead>
+                <tbody id="resultmateriastable"></tbody>
+            </table>
+        </fieldset>
+        <fieldset id="resultwarningview" style="display:none;">
+            <legend>Notes</legend>
+            <div>
+                <ol>
+                    <li>
+                    </li>
+                </ol>
+            </div>
+        </fieldset>
+        <div>
+            <a href="#mainview" id="recalculatebutton1">Change setting and re-calculate</a>
+        </div>
+    </div>
+    <fieldset id="generalsettingview" style="display:none;">
+        <legend>一般的な設定</legend>
+        <fieldset>
+            <legend>表示</legend>
+            <table>
+                <tr>
+                    <td style="text-align:right;">レイアウト:</td>
+                    <td>
+                        <select id="pagelayout" name="pagelayout" disabled="disabled">
+                            <option value="1" selected="selected">レイアウト1</option>
+                            <option value="2">レイアウト2</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+        <div style="margin-top:1em;">
+            <a href="#mainview">戻る</a>
+        </div>
+    </fieldset>
+    <fieldset id="outlineview" style="display:none;">
+        <legend>Introduction</legend>
+        <div style="margin-top:1em;">
+            <a href="#mainview">Calculate</a>
+        </div>
+
+        <p>初めて利用される方は以下をお読みください。</p>
+        <fieldset>
+            <legend>本アプリケーションについて</legend>
+            <p>このアプリケーションは、<a href="http://jp.finalfantasyxiv.com/">FINAL FANTASY XIV</a>においてマテリアの装着にかかる費用の期待値を計算するものです。</p>
+        </fieldset>
+        <fieldset>
+            <legend>対応バージョン</legend>
+            <p><a href="http://jp.finalfantasyxiv.com/">FINAL FANTASY XIV</a> 5.0 SHADOWBRINGERS(漆黒の反逆者)に対応済です</p>
+        </fieldset>
+        <fieldset>
+            <legend>必要なもの</legend>
+            <p>ブラウザでページを表示するだけで利用できます。追加でインストールが必要なソフトウェアはありません。</p>
+        </fieldset>
+        <fieldset>
+            <legend>使い方</legend>
+            <ol>
+                <li><a href="#mainview">メインページ</a>を表示してください。</li>
+                <li>「装着対象装備の設定」、「マテリア装着の設定」を入力してください。</li>
+                <li>
+                    「上げたいステータスの設定」を入力してください。<br />
+                    ステータスの値にはとりあえずその装備の上限値を入れてみて、計算結果が高コストすぎたり実現不可能だった場合には見直しをかければいいでしょう。
+                </li>
+                <li>
+                    「アイテムの相場の設定」でマテリアや触媒の相場を入力してください。品薄で入手が困難などの理由で使用したくないマテリアや触媒がある場合は、そのアイテムのチェックを外してください。<br />
+                    「クリアする」ボタンを押すと入力されているアイテムの相場がすべて消去されます。<br />
+                    「サンプル設定」ボタンを押すと入力されているアイテムの相場が消去されて代わりにサンプルのアイテム相場データが自動的に入力されます。
+                </li>
+                <li>「計算開始」ボタンを押すと、計算結果として合計費用の期待値がもっとも安価なマテリアの装着順番が表示されます。</li>
+            </ol>
+            <p>
+                なお、簡単にお試しで使っていただけるように、マテリアの相場の初期設定としてサンプルデータ(某鯖での某月某日の相場)が設定済みになっています。<br />
+                <b>本番で計算をする場合は、ゲーム内のマーケットボードでマテリアの相場を確認し、設定をし直してください。</b>
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>プライバシーについて</legend>
+            <ul>
+                <li>相場情報など、あなたが入力したデータはお使いのブラウザに保存されます。</li>
+                <li>あなたが入力したデータや計算結果が外部に送信されることはありません。</li>
+                <li>他のユーザからあなたが入力したデータを利用することはできませんし、逆にほかのユーザが入力したデータをあなたが利用することもできません。</li>
+            </ul>
+        </fieldset>
+        <fieldset>
+            <legend>注意事項</legend>
+            <ul>
+                <li>
+                    表示される合計費用はあくまで<span style="font-weight:bold; color:blue;">期待値</span>であり、実際にかかる費用は運によってかなりまちまちな値になります。<br />
+                    実際の費用が表示された値よりはるかに大きくなることも、または小さくなることもあり得ます。「平均的な運ならば大体この前後ぐらいの費用になる」程度に考えてください。
+                </li>
+                <li>
+                    万一このアプリケーションを使用することによりユーザーまたは第三者が何らかの損害を被った場合、それがゲーム内かどうかにかかわらず、開発者は責任を負いかねますのでご了承ください。
+                </li>
+            </ul>
+        </fieldset>
+    </fieldset>
+    <fieldset id="errorview" style="display:none;">
+        <legend>Error</legend>
+        <div>
+            <p class="errormessagetextstyle">指定されたステータスを実現するマテリアの組み合わせがありません。<br />設定を見直してください。</p>
+            <h1>【ヒント】</h1>
+            <ul>
+                <li>対象装備のアイテムレベル/品質/マテリア穴の数を間違えていませんか?</li>
+                <li>使用するかもしれないマテリアの相場をすべて入力していますか?</li>
+                <!--<li>STR/VIT/DEX/INT/MNDのいずれかを禁断しなければ達成できないようなステータスを目標値に設定していませんか?<br /><b>※STR/VIT/DEX/INT/MNDのいずれかのステータスを上げるマテリアを禁断装着することはできません。</b></li>-->
+                <li>エクスマテリジャまたはハイマテリジャを2回目以降の禁断に使用しなければ達成できないようなステータスを目標値に設定していませんか?<br /><b>※エクスマテリジャとハイマテリジャは禁断の2回目以降に使用することはできません。</b></li>
+            </ul>
+            <a href="#mainview">設定を変更して再計算する</a>
+        </div>
+    </fieldset>
+    <footer style="display:none;">
+        <hr />
+        <div>
+            <a href="#outlineview">Introduction</a>
+            <!--<a href="#generalsettingview" style="margin-left:1em;">一般的な設定</a>-->
+            <a href="http://jp.finalfantasyxiv.com/lodestone/" style="margin-left:1em;">Official site</a>
+        </div>
+        <hr />
+        <div>
+            <p class="copyrightblockstyle">
+                FINAL FANTASY XIV © 2010 - 2020 SQUARE ENIX CO., LTD. All Rights Reserved.
+                /
+                Copyright (C) 2017-2020 <a href="https://github.com/rougemeilland">Palmtree Software</a> All Rights Reserved.
+            </p>
+            <p class="versioninfoblockstyle">
+                Last updated: 3/15/2020
+            </p>
+        </div>
+    </footer>
+
+    <!--スクリプトから使用される、言語依存のデータ/テキスト-->
+    <input type="hidden" id="currentlanguage" value="fr" />
+    <input type="hidden" id="itempriceerrormessage_empty" value="Input market price of materia" />
+    <input type="hidden" id="itempriceerrormessage_badformat" value="Enter an integer" />
+    <input type="hidden" id="usedslottext" value="(melded)" />
+    <input type="hidden" id="notusedmateriatext" value="(unavailable)" />
+    <!---->
+    <!-- 動的に生成されたタグ(<a href="..." class="eorzeadb_link"></a>)にはツールチップは表示されないらしいので、スクリプトの読み込みは行わない。
+        <script src="http://img.finalfantasyxiv.com/lds/pc/global/js/eorzeadb/loader.js?v1"></script>
+    -->
+    <script type="text/javascript" src="materiacalcscript.min.js" async="async"></script>
+</body>
+</html>
